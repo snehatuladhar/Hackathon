@@ -134,34 +134,36 @@ def facultyCourses(request):
 
 # Particular course page (student view)
 def course_page(request, code):
-    try:
-        course = Course.objects.get(code=code)
-        if is_student_authorised(request, code):
-            try:
-                announcements = Announcement.objects.filter(course_code=course)
-                assignments = Assignment.objects.filter(
-                    course_code=course.code)
-                materials = Material.objects.filter(course_code=course.code)
+    # try:
+    course = Course.objects.get(code=code)
+    if is_student_authorised(request, code):
+        try:
+            announcements = Announcement.objects.filter(course_code=course)
+            assignments = Assignment.objects.filter(
+                course_code=course.code)
+            materials = Material.objects.filter(course_code=course.code)
 
-            except:
-                announcements = None
-                assignments = None
-                materials = None
+        except:
+            announcements = None
+            assignments = None
+            materials = None
 
-            context = {
-                'course': course,
-                'announcements': announcements,
-                'assignments': assignments[:3],
-                'materials': materials,
-                'student': Student.objects.get(student_id=request.session['student_id'])
-            }
+        context = {
+            'course': course,
+            'announcements': announcements,
+            'assignments': assignments[:3],
+            'materials': materials,
+            'student': Student.objects.get(student_id=request.session['student_id'])
+        }
 
-            return render(request, 'main/course.html', context)
+        print(materials)
 
-        else:
-            return redirect('std_login')
-    except:
-        return render(request, 'error.html')
+        return render(request, 'main/course.html', context)
+
+    else:
+        return redirect('std_login')
+    # except:
+    #     return render(request, 'error.html')
 
 
 # Particular course page (faculty view)
@@ -485,23 +487,73 @@ def addCourseMaterial(request, code):
     else:
         return redirect('std_login')
 
-def viewCourseMaterial(request, code):
-    if is_faculty_authorised(request, code):
-        if request.method == 'POST':
-            form = MaterialForm(request.POST, request.FILES)
-            form.instance.course_code = Course.objects.get(code=code)
+def courseMaterial(request, code, id):
+    if request.session.get('student_id') or request.session.get('faculty_id'):
+        material = Material.objects.get(course_code=code, id=id)
+        course = Course.objects.get(code=code)
+        print(material)
+        # courses = Course.objects.all()
+        if request.session.get('student_id'):
+            student = Student.objects.get(
+                student_id=request.session['student_id'])
+        else:
+            student = None
+        if request.session.get('faculty_id'):
+            faculty = Faculty.objects.get(
+                faculty_id=request.session['faculty_id'])
+        else:
+            faculty = None
+
+        # enrolled = student.course.all() if student else None
+        # accessed = Course.objects.filter(
+        #     faculty_id=faculty.faculty_id) if faculty else None
+        # if is_faculty_authorised(request, code):
+        context = {
+            'material': material,
+            'faculty': faculty,
+            'course': course,
+            # 'courses': courses,
+            'student': student,
+            # 'enrolled': enrolled,
+            # 'accessed': accessed
+        }
+
+        return render(request, 'main/material.html', context)
+            # form = MaterialForm()
+            # # print(form)
+            # return render(request, 'main/course-material.html', {'course': Course.objects.get(code=code), 'faculty': Faculty.objects.get(faculty_id=request.session['faculty_id']), 'form': form})
+    else:
+        return redirect('std_login')
+
+def editCourseMaterial(request, code, id):
+    if request.session.get('faculty_id'):
+        instance = Material.objects.get(id=id)
+        if request.method == "POST":
+            # form = MyModelForm(request.POST, instance=instance)
+            form = MaterialForm(request.POST or None, instance=instance)
             if form.is_valid():
                 form.save()
-                messages.success(request, 'New course material added')
-                return redirect('/faculty/' + str(code))
-            else:
-                faculty = Faculty.objects.get(faculty_id=request.session['faculty_id'])
-                print(faculty)
-                return render(request, 'main/course-material.html', {'course': Course.objects.get(code=code), 'faculty': Faculty.objects.get(faculty_id=request.session['faculty_id']), 'form': form})
+                print("in valid1")
+                return redirect("viewCourseMaterial", code, id)
+            # else:
+            #     return render(request, 'main/editMaterial.html', context)
+            # return render(request, 'my_template.html', {'form': form}) 
+
+            # return render(request, 'main/editMaterial.html', context)
         else:
-            form = MaterialForm()
-            # print(form)
-            return render(request, 'main/course-material.html', {'course': Course.objects.get(code=code), 'faculty': Faculty.objects.get(faculty_id=request.session['faculty_id']), 'form': form})
+            faculty = Faculty.objects.get(
+                faculty_id=request.session['faculty_id'])
+            form = MaterialForm(request.POST or None, instance=instance)
+            course = Course.objects.get(code=code)
+            context = {
+                'course': course,
+                'material': instance,
+                'form': form,
+                'faculty': faculty
+            }
+            # return redirect("viewCourseMaterial", code, id)
+            return render(request, 'main/editMaterial.html', context)
+            # form = MaterialForm(instance=instance)
     else:
         return redirect('std_login')
 

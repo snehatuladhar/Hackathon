@@ -14,8 +14,8 @@ class Student(models.Model):
         'Course', related_name='students', blank=True)
     photo = models.ImageField(upload_to='profile_pics', blank=True,
                               null=False, default='profile_pics/default_student.png')
-    department = models.ForeignKey(
-        'Department', on_delete=models.CASCADE, null=False, blank=False, related_name='students')
+    ClassRoom = models.ForeignKey(
+        'ClassRooms', on_delete=models.CASCADE, null=False, blank=False, related_name='students')
 
     def delete(self, *args, **kwargs):
         if self.photo != 'profile_pics/default_student.png':
@@ -29,37 +29,37 @@ class Student(models.Model):
         return self.name
 
 
-class Faculty(models.Model):
-    faculty_id = models.IntegerField(primary_key=True)
+class Instructor(models.Model):
+    instructor_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=100, null=False)
     email = models.EmailField(max_length=100, null=True, blank=True)
     password = models.CharField(max_length=255, null=False)
-    department = models.ForeignKey(
-        'Department', on_delete=models.CASCADE, null=False, related_name='faculty')
+    ClassRoom = models.ForeignKey(
+        'ClassRooms', on_delete=models.CASCADE, null=False, related_name='instructor')
     role = models.CharField(
-        default="Faculty", max_length=100, null=False, blank=True)
+        default="Instructor", max_length=100, null=False, blank=True)
     photo = models.ImageField(upload_to='profile_pics', blank=True,
-                              null=False, default='profile_pics/default_faculty.png')
+                              null=False, default='profile_pics/default_instructor.png')
 
     def delete(self, *args, **kwargs):
-        if self.photo != 'profile_pics/default_faculty.png':
+        if self.photo != 'profile_pics/default_instructor.png':
             self.photo.delete()
         super().delete(*args, **kwargs)
 
     class Meta:
-        verbose_name_plural = 'Faculty'
+        verbose_name_plural = 'Instructor'
 
     def __str__(self):
         return self.name
 
 
-class Department(models.Model):
-    department_id = models.IntegerField(primary_key=True)
+class ClassRooms(models.Model):
+    classe_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=100, null=False)
     description = models.TextField(null=True, blank=True)
 
     class Meta:
-        verbose_name_plural = 'Departments'
+        verbose_name_plural = 'Classes'
 
     def __str__(self):
         return self.name
@@ -67,8 +67,8 @@ class Department(models.Model):
     def student_count(self):
         return self.students.count()
 
-    def faculty_count(self):
-        return self.faculty.count()
+    def instructor_count(self):
+        return self.instructor.count()
 
     def course_count(self):
         return self.courses.count()
@@ -77,15 +77,15 @@ class Department(models.Model):
 class Course(models.Model):
     code = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=255, null=False, unique=True)
-    department = models.ForeignKey(
-        Department, on_delete=models.CASCADE, null=False, related_name='courses')
-    faculty = models.ForeignKey(
-        Faculty, on_delete=models.SET_NULL, null=True, blank=True)
+    ClassRoom = models.ForeignKey(
+        ClassRooms, on_delete=models.CASCADE, null=False, related_name='courses')
+    instructor = models.ForeignKey(
+        Instructor, on_delete=models.SET_NULL, null=True, blank=True)
     studentKey = models.IntegerField(null=False, unique=True)
-    facultyKey = models.IntegerField(null=False, unique=True)
+    instructorKey = models.IntegerField(null=False, unique=True)
 
     class Meta:
-        unique_together = ('code', 'department', 'name')
+        unique_together = ('code', 'ClassRoom', 'name')
         verbose_name_plural = "Courses"
 
     def __str__(self):

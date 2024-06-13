@@ -1,5 +1,5 @@
 from django.db import models
-from main.models import Student, Faculty, Course
+from main.models import Student, Instructor, Course
 
 
 class StudentDiscussion(models.Model):
@@ -20,12 +20,12 @@ class StudentDiscussion(models.Model):
         return self.sent_at.strftime("%d-%b-%y, %I:%M %p")
 
 
-class FacultyDiscussion(models.Model):
+class InstructorDiscussion(models.Model):
     content = models.TextField(max_length=1600, null=False)
     course = models.ForeignKey(
         Course, on_delete=models.CASCADE, related_name='courseDiscussions')
     sent_by = models.ForeignKey(
-        Faculty, on_delete=models.CASCADE, related_name='courseDiscussions')
+        Instructor, on_delete=models.CASCADE, related_name='courseDiscussions')
     sent_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

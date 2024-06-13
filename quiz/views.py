@@ -1,8 +1,8 @@
 import datetime
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Quiz, Question, StudentAnswer
-from main.models import Student, Course, Faculty
-from main.views import is_faculty_authorised, is_student_authorised
+from main.models import Student, Course, Instructor
+from main.views import is_instructor_authorised, is_student_authorised
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Count, Sum, F, FloatField, Q, Prefetch
@@ -12,7 +12,7 @@ from django.db.models.functions import Cast
 def quiz(request, code):
     try:
         course = Course.objects.get(code=code)
-        if is_faculty_authorised(request, code):
+        if is_instructor_authorised(request, code):
             if request.method == 'POST':
                 title = request.POST.get('title')
                 description = request.POST.get('description')
@@ -24,7 +24,7 @@ def quiz(request, code):
                 quiz.save()
                 return redirect('addQuestion', code=code, quiz_id=quiz.id)
             else:
-                return render(request, 'quiz/quiz.html', {'course': course, 'faculty': Faculty.objects.get(faculty_id=request.session['faculty_id'])})
+                return render(request, 'quiz/quiz.html', {'course': course, 'instructor': Instructor.objects.get(instructor_id=request.session['instructor_id'])})
 
         else:
             return redirect('std_login')
@@ -35,7 +35,7 @@ def quiz(request, code):
 def addQuestion(request, code, quiz_id):
     try:
         course = Course.objects.get(code=code)
-        if is_faculty_authorised(request, code):
+        if is_instructor_authorised(request, code):
             quiz = Quiz.objects.get(id=quiz_id)
             if request.method == 'POST':
                 question = request.POST.get('question')
@@ -51,10 +51,10 @@ def addQuestion(request, code, quiz_id):
                 question.save()
                 messages.success(request, 'Question added successfully')
             else:
-                return render(request, 'quiz/addQuestion.html', {'course': course, 'quiz': quiz, 'faculty': Faculty.objects.get(faculty_id=request.session['faculty_id'])})
+                return render(request, 'quiz/addQuestion.html', {'course': course, 'quiz': quiz, 'instructor': Instructor.objects.get(instructor_id=request.session['instructor_id'])})
             if 'saveOnly' in request.POST:
                 return redirect('allQuizzes', code=code)
-            return render(request, 'quiz/addQuestion.html', {'course': course, 'quiz': quiz, 'faculty': Faculty.objects.get(faculty_id=request.session['faculty_id'])})
+            return render(request, 'quiz/addQuestion.html', {'course': course, 'quiz': quiz, 'instructor': Instructor.objects.get(instructor_id=request.session['instructor_id'])})
         else:
             return redirect('std_login')
     except:
@@ -62,7 +62,7 @@ def addQuestion(request, code, quiz_id):
 
 
 def allQuizzes(request, code):
-    if is_faculty_authorised(request, code):
+    if is_instructor_authorised(request, code):
         course = Course.objects.get(code=code)
         quizzes = Quiz.objects.filter(course=course)
         for quiz in quizzes:
@@ -72,7 +72,7 @@ def allQuizzes(request, code):
             else:
                 quiz.started = False
             quiz.save()
-        return render(request, 'quiz/allQuizzes.html', {'course': course, 'quizzes': quizzes, 'faculty': Faculty.objects.get(faculty_id=request.session['faculty_id'])})
+        return render(request, 'quiz/allQuizzes.html', {'course': course, 'quizzes': quizzes, 'instructor': Instructor.objects.get(instructor_id=request.session['instructor_id'])})
     else:
         return redirect('std_login')
 
@@ -205,7 +205,7 @@ def quizResult(request, code, quiz_id):
 
 
 def quizSummary(request, code, quiz_id):
-    if is_faculty_authorised(request, code):
+    if is_instructor_authorised(request, code):
         course = Course.objects.get(code=code)
         quiz = Quiz.objects.get(id=quiz_id)
 
@@ -249,8 +249,8 @@ def quizSummary(request, code, quiz_id):
                     "%a, %d-%b-%y at %I:%M %p")
 
         context = {'course': course, 'quiz': quiz, 'questions': questions, 'time': time, 'total_students': total_students,
-                   'students': students, 'faculty': Faculty.objects.get(faculty_id=request.session['faculty_id'])}
-        return render(request, 'quiz/quizSummaryFaculty.html', context)
+                   'students': students, 'instructor': Instructor.objects.get(instructor_id=request.session['instructor_id'])}
+        return render(request, 'quiz/quizSummaryInstructor.html', context)
 
     else:
         return redirect('std_login')

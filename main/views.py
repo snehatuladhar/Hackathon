@@ -485,6 +485,25 @@ def addCourseMaterial(request, code):
     else:
         return redirect('std_login')
 
+def viewCourseMaterial(request, code):
+    if is_faculty_authorised(request, code):
+        if request.method == 'POST':
+            form = MaterialForm(request.POST, request.FILES)
+            form.instance.course_code = Course.objects.get(code=code)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'New course material added')
+                return redirect('/faculty/' + str(code))
+            else:
+                faculty = Faculty.objects.get(faculty_id=request.session['faculty_id'])
+                print(faculty)
+                return render(request, 'main/course-material.html', {'course': Course.objects.get(code=code), 'faculty': Faculty.objects.get(faculty_id=request.session['faculty_id']), 'form': form})
+        else:
+            form = MaterialForm()
+            # print(form)
+            return render(request, 'main/course-material.html', {'course': Course.objects.get(code=code), 'faculty': Faculty.objects.get(faculty_id=request.session['faculty_id']), 'form': form})
+    else:
+        return redirect('std_login')
 
 def deleteCourseMaterial(request, code, id):
     if is_faculty_authorised(request, code):

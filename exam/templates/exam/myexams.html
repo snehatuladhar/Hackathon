@@ -1,5 +1,5 @@
 {% extends 'index.html' %}
-{% block title %}Quizzes | {{ course.name }} {% endblock title %}
+{% block title %}Exams | {{ course.name }} {% endblock title %}
 {% block profile %}
 {% url 'profile' student.student_id %}
 {% endblock %}
@@ -23,16 +23,16 @@
             </li>
             <li class="breadcrumb-item fw-bold"><a style="color: rgb(10, 10, 48)"
                href="{% url 'course' course.code %}">{{ course.name }}</a></li>
-            <li class="breadcrumb-item active animate__animated animate__backInRight" aria-current="page">Quizzes</li>
+            <li class="breadcrumb-item active animate__animated animate__backInRight" aria-current="page">Exams</li>
          </ol>
       </nav>
    </div>
    <!-- navigation links end -->
    <div class="container">
-      <h6 class="fw-bold"> Active Quizzes </h6>
+      <h6 class="fw-bold"> Active Exams </h6>
       <div class="table-responsive animate__animated animate__fadeIn">
          <table class="table text-center shadow" style="white-space: nowrap;">
-            {% if active_quizzes %}
+            {% if active_exams %}
             <thead class="bg-dark text-light">
                <tr>
                   <th scope="col">SL</th>
@@ -44,15 +44,15 @@
                </tr>
             </thead>
             <tbody class="">
-               {% for quiz in active_quizzes %}
+               {% for exam in active_exams %}
                <tr>
                   <th scope="row">{{forloop.counter}}</th>
-                  <td><a href="{% url 'startQuiz' course.code quiz.id %}">{{quiz.title}}</a></td>
-                  <td>{{quiz.starts}}</td>
-                  <td>{{quiz.ends}}</td>
-                  {% if quiz.total_questions > 0 %}
-                  <td>{{quiz.total_questions}}</td>
-                  <td>{{quiz.total_marks}}</td>
+                  <td><a href="{% url 'startExam' course.code exam.id %}">{{exam.title}}</a></td>
+                  <td>{{exam.starts}}</td>
+                  <td>{{exam.ends}}</td>
+                  {% if exam.total_questions > 0 %}
+                  <td>{{exam.total_questions}}</td>
+                  <td>{{exam.total_marks}}</td>
                   {% else %}
                   <td class="text-center">Questions not set yet</td>
                   <td class="text-center">0</td>
@@ -61,16 +61,16 @@
                {% endfor %}
                {% else %}
                <tr>
-                  <th class="text-center">No active quizzes available</th>
+                  <th class="text-center">No active exams available</th>
                </tr>
                {% endif %}
             </tbody>
          </table>
       </div>
-      <h6 class="fw-bold"> Previous Quizzes </h6>
+      <h6 class="fw-bold"> Previous Exams </h6>
       <div class="table-responsive animate__animated animate__fadeIn">
          <table class="table text-center shadow" style="white-space: nowrap;">
-            {% if previous_quizzes %}
+            {% if previous_exams %}
             <thead class="bg-dark text-light">
                <tr>
                   <th scope="col">SL</th>
@@ -81,25 +81,25 @@
                </tr>
             </thead>
             <tbody class="">
-               {% for quizP in previous_quizzes %}
-               {% if quizP.attempted %}
-               {% if quizP.publish_status %}
+               {% for examP in previous_exams %}
+               {% if examP.attempted %}
+               {% if examP.publish_status %}
                <tr>
                   <th scope="row">{{forloop.counter}}</th>
                   <td class="fw-bold">
-                     <a href="{% url 'quizResult' course.code quizP.id %}">{{quizP.title}}</a>
+                     <a href="{% url 'examResult' course.code examP.id %}">{{examP.title}}</a>
                   </td>
-                  <td>{{quizP.ends}}</td>
-                  <td class="fw-bold marks">{{quizP.total_marks_obtained}}/ {{ quizP.total_marks}}</td>
-                  <td class="fw-bold percentage"> {{ quizP.percentage}}%</td>
+                  <td>{{examP.ends}}</td>
+                  <td class="fw-bold marks">{{examP.total_marks_obtained}}/ {{ examP.total_marks}}</td>
+                  <td class="fw-bold percentage"> {{ examP.percentage}}%</td>
                </tr>
                {% else %}
                <tr>
                   <th scope="row">{{forloop.counter}}</th>
                   <td>
-                     {{quizP.title}}
+                     {{examP.title}}
                   </td>
-                  <td>{{quizP.ends}}</td>
+                  <td>{{examP.ends}}</td>
                   <td colspan="2" class="text-center"> <span class="text-dark bg-warning bg-opacity-25 fw-bold rounded px-3 py-1" style="font-size:smaller">Not Published</span></td>
                </tr>
                {% endif %}
@@ -107,16 +107,16 @@
                <tr>
                   <th scope="row">{{forloop.counter}}</th>
                   <td>
-                     {{quizP.title}}
+                     {{examP.title}}
                   </td>
-                  <td>{{quizP.ends}}</td>
+                  <td>{{examP.ends}}</td>
                   <td colspan="2" class="text-center"> <span class="text-light bg-danger fw-bold rounded px-2 py-1" style="font-size:smaller">Did not attempt</span></td>
                </tr>
                {% endif %}
                {% endfor %}
                {% else %}
                <tr>
-                  <th scope="col" class="text-center">No previous quiz attempts</th>
+                  <th scope="col" class="text-center">No previous exam attempts</th>
                </tr>
                {% endif %}
             </tbody>

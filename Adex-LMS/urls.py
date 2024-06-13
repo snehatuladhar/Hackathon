@@ -34,6 +34,6 @@ urlpatterns = [
     path('', include('main.urls')),
     path('', include('discussion.urls')),
     path('', include('attendance.urls')),
-    path('', include('quiz.urls')),
+    path('', include('exam.urls')),
     path('froala_editor/', include('froala_editor.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

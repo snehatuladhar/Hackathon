@@ -1,5 +1,5 @@
 {% extends 'index.html' %}
-{% block title %}Add Question {{quiz.title}} | {{ course.name }} {% endblock title %}
+{% block title %}Add Question {{exam.title}} | {{ course.name }} {% endblock title %}
 {% block profile %}
 {% url 'profile' instructor.instructor_id %}
 {% endblock %}
@@ -35,19 +35,19 @@
          <li class="breadcrumb-item fw-bold"><a style="color: rgb(10, 10, 48)"
             href="{% url 'instructor' course.code %}">{{ course.name }}</a></li>
          <li class="breadcrumb-item fw-bold"><a style="color: rgb(10, 10, 48)"
-            href="{% url 'allQuizzes' course.code %}">Quizzes</a></li>
-         <li class="breadcrumb-item active animate__animated animate__backInRight" aria-current="page"> Add Question-{{quiz.title}}</li>
+            href="{% url 'allexams' course.code %}">Exams</a></li>
+         <li class="breadcrumb-item active animate__animated animate__backInRight" aria-current="page"> Add Question-{{exam.title}}</li>
       </ol>
    </nav>
 </div>
 {% comment %} navigation links end  {% endcomment %}
 
 <div class="container shadow-sm rounded p-4 animate__animated animate__zoomInLeft" style="max-width: 768px;">
-   <p class="text-start">Add Question for <span class="fw-bold">"{{quiz.title}}"</span></p>
-   <form action=" {% url 'addQuestion' course.code quiz.id %} " method="post">
+   <p class="text-start">Add Question for <span class="fw-bold">"{{exam.title}}"</span></p>
+   <form action=" {% url 'addQuestion' course.code exam.id %} " method="post">
       {% csrf_token %}
       <div class="mb-3 row">
-         <label for="textarea" class="col-sm-2 col-form-label fw-bold">Question {{quiz.question_sl}}</label>
+         <label for="textarea" class="col-sm-2 col-form-label fw-bold">Question {{exam.question_sl}}</label>
          <div class="col-sm-10">
             <textarea class="form-control" id="textarea" style="height: 100px;" name="question" required></textarea>
          </div>
@@ -98,7 +98,7 @@
       <div class="p-2 d-flex flex-row-reverse" style="background-color: rgb(250,250,250);">
          <button name="saveAdd" class="btn btn-sm btn-success px-2 mx-2" type="submit">Save and add another</button>
          <button name="saveOnly" class="btn btn-sm btn-primary px-3 mx-2" type="submit">Save</button>
-         <a href="{% url 'allQuizzes' course.code %}" class="btn btn-sm btn-outline-danger me-auto">Cancel</a>
+         <a href="{% url 'allexams' course.code %}" class="btn btn-sm btn-outline-danger me-auto">Cancel</a>
       </div>
    </form>
 </div>

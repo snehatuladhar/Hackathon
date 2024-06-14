@@ -1,0 +1,145 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>{% block title %}{% endblock title %}</title>
+      <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/icon/apple-touch-icon.png' %}">
+      <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/icon/favicon-32x32.png' %}">
+      <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/icon/favicon-16x16.png' %}">
+      <link rel="manifest" href="{% static 'images/icon/site.webmanifest' %}">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+      <link rel="stylesheet" href="{% static 'styles/bootstrap.min.css' %}">
+      
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha512-z4OUqw38qNLpn1libAN9BsoDx6nbNFio5lA6CuTp9NlK83b89hgyCVq+N5FdBJptINztxn1Z3SaKSKUS5UP60Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+      <link rel="stylesheet" href="{% static 'styles/style.css' %}">
+      {{ form.media }}
+      
+      
+   </head>
+   <body style="background-image: url(/static/images/backdrop.png);background-position-x: center ; background-position-y:center ; background-repeat: no-repeat;">
+      <!-- Navbar Starts -->
+      <div style="display: flex; flex-direction: column; justify-content: space-between;">
+      <div>
+      <nav class="navbar sticky-top navbar-expand-lg navbar-dark navbar-mod">
+         <div class="container-fluid">
+            <a class="navbar-brand fw-bold fs-5 px-2 py-1" href="/admin" target="_blank" data-bs-toggle="tooltip"
+               data-bs-placement="bottom" title="Access admin panel">
+               <img src="/static/images/logo.png" alt="logo" width="80px">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01"
+               aria-controls="navbarColor01" aria-expanded="true" aria-label="Toggle navigation">
+            <span class=" navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarColor01">
+               <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                  <li class="nav-item">
+                     <a class="nav-link active fw-bold" aria-current="page" href="{% block courses %}{% endblock courses %}"
+                        data-bs-toggle="tooltip" data-bs-placement="bottom" title="Course home page">Dashboard</a>
+                  </li>
+                  <li class="nav-item">
+                     <a class="nav-link active fw-bold" aria-current="page" href="/departments"
+                        data-bs-toggle="tooltip" data-bs-placement="bottom" title="Course home page">Departments</a>
+                  </li>
+                  <li class="nav-item">
+                     <a class="nav-link active fw-bold" href="{% block allCourses %}{% endblock %}" data-bs-toggle="tooltip"
+                        data-bs-placement="bottom" title="Show all courses">Courses</a>
+                  </li>
+                  <li class="nav-item">
+                     <a class="nav-link active fw-bold" href="{% url 'std_logout' %}" data-bs-toggle="tooltip"
+                        data-bs-placement="bottom" title="Log out">Log out</a>
+                  </li>
+                  <li class="nav-item">
+                     <a class="nav-link active fw-bold" href="{% block profile %}{% endblock profile %}"
+                        data-bs-toggle="tooltip" data-bs-placement="bottom"
+                        title="Check your profile">{% block user %}{% endblock  %}</a>
+                  </li>
+               </ul>
+               <form class="d-flex" action=" {% url 'search' %}" method="GET">
+                  <input id="searchIn" class="form-control me-2 searchbar" type="search" placeholder="Search courses" aria-label="Search"
+                     name="q">
+                  <button id="searchBtn" class="btn btn-outline-light" type="submit">Search</button>
+               </form>
+            </div>
+         </div>
+      </nav>
+      </div>
+      <!-- Navbar Ends -->
+      <div style="padding-bottom: 60px;">
+      {% block  content %}
+      
+      {% endblock  %}
+      </div>
+     
+      
+
+      <div>
+      <footer class="bg-body-tertiary text-center" style="position: absolute; width: 100%; bottom: 0; background-color: #fff; border-top: 1px solid #dfdddd;">
+         <!-- Grid container -->
+         <div class="container p-2 pb-0">
+           <!-- Section: Social media -->
+           <section class="mb-4">
+             <!-- Facebook -->
+             <a
+             data-mdb-ripple-init
+               class="btn text-white btn-floating m-1"
+               style="background-color: #3b5998;"
+               href="https://www.facebook.com/adexintltd" target="_blank"
+               role="button"
+               ><i class="fab fa-facebook-f"></i
+             ></a>
+       
+             <!-- Twitter -->
+             <a
+               data-mdb-ripple-init
+               class="btn text-white btn-floating m-1"
+               style="background-color: #55acee;"
+               href="https://www.linkedin.com/company/adexltd/" target="_blank"
+               role="button"
+               ><i class="fab fa-linkedin-in"></i
+             ></a>
+       
+       
+             <!-- Instagram -->
+             <a
+               data-mdb-ripple-init
+               class="btn text-white btn-floating m-1"
+               style="background-color: #ac2bac;"
+               href="https://www.instagram.com/adex.ltd/" target="_blank"
+               role="button"
+               ><i class="fab fa-instagram"></i
+             ></a>
+
+             <!-- Gmail -->
+             <a
+               data-mdb-ripple-init
+               class="btn text-white btn-floating m-1"
+               style="background-color: #c5b418;"
+               href="https://www.instagram.com/adex.ltd/" target="_blank"
+               role="button"
+               ><i class="fa-solid fa-envelope"></i></a>
+       
+            
+            
+           </section>
+           <!-- Section: Social media -->
+         </div>
+         <!-- Grid container -->
+       
+         <!-- Copyright -->
+         <div class="text-center p-3" style="background-color: #4e297c;">
+           <a class="text-body" href="" style="color: #fff !important;">Adex International: info@adexint.com</a>
+         </div>
+         <!-- Copyright -->
+       </footer> 
+      </div>
+      </div>
+      <script src=" {% static 'js/bootstrap.bundle.min.js' %} "></script>
+   </body>
+   
+</html>

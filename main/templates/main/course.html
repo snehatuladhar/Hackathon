@@ -116,23 +116,28 @@
          <div class="fw-bold animate__animated animate__zoomInDown fs-5 text-center border-bottom border-1 mb-2 py-2" style="color: rgb(10, 10, 48);"><img src="{% static 'images/icon/folder.png' %}"
             alt="" style="height:1.5rem;vertical-align: text-top"><span style="margin-right: 0.6rem;"></span>Course Material</div>
          <!-- section title ends -->
-         <div>
-            {% for material in materials  %}
-            <!-- individual material starts -->
-            <p>{% autoescape off %}{{ material.description }}{% endautoescape %}</p>
-            <div class="d-flex justify-content-between text-break">
+
+         <div class="row">
+            {% for material in materials %}
+            <div class="card col-4 m-3" style="width: 18rem;">
                {% if material.file %}
-               <a class="fw-bold" href="{{ material.file.url }}"><span style="color:#9400d3" id="materialName">File : {{material.file.name}}</span></a><br>
+               <img class="card-img-top" src="/media/{{material.file.name}}" alt="Card image cap">
                {% endif %}
-               <div class="text-muted">
-                  {{material.post_date}}
+               <div class="card-body">
+                  <h5 class="card-title">{{ material.title }}</h5>
+                  <p class="card-text text-truncate">{% autoescape off %}{{material.description}}{% endautoescape %}</p>
+                  <a href="/course-material/detail/{{course.code}}/{{material.id}}" class="btn btn-primary">Open Content</a>
+                  <div style="color:grey;">
+                     {{material.post_date}}
+                  </div>
                </div>
             </div>
             {% empty %}
             <p class="text-center text-muted fs-6">Course materials not available</p>
             {% endfor %}
-            <!-- individual material ends -->
          </div>
+
+
       </div>
       <!-- course material section ends -->
    </div>

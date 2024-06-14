@@ -44,11 +44,13 @@ class MaterialForm(forms.ModelForm):
             field.required = True
             field.label = ""
         self.fields['file'].required = False
+        self.fields['file'].label = "Thumbnail"
 
     class Meta:
         model = Material
-        fields = ('description', 'file')
+        fields = ('title', 'description', 'file')
         widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control mt-1', 'id': 'title', 'name': 'title', 'placeholder': 'Title'}),
             'description': FroalaEditor(),
-            'file': forms.FileInput(attrs={'class': 'form-control', 'id': 'file', 'name': 'file', 'aria-describedby': 'file', 'aria-label': 'Upload'}),
+            'file': forms.FileInput(attrs={'class': 'form-control', 'id': 'file', 'name': 'file', 'aria-describedby': 'file', 'aria-label': 'Thumbnail'}),
         }

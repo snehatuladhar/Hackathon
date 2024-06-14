@@ -190,6 +190,7 @@ class Material(models.Model):
     description = models.TextField(max_length=2000, null=False)
     datetime = models.DateTimeField(auto_now_add=True, null=False)
     file = models.FileField(upload_to='materials/', null=True, blank=True)
+    title = models.TextField(max_length=200, null=False)
 
     class Meta:
         verbose_name_plural = "Materials"

@@ -1,13 +1,13 @@
 {% extends 'index.html' %}
-{% block title %}{{quiz.title}} | {{ course.name }} {% endblock title %}
+{% block title %}{{exam.title}} | {{ course.name }} {% endblock title %}
 {% block profile %}
-{% url 'profile' faculty.faculty_id %}
+{% url 'profile' instructor.instructor_id %}
 {% endblock %}
 {% block user %}
-{{faculty.name}}
+{{instructor.name}}
 {% endblock user %}
 {% block courses %}
-{% url 'facultyCourses' %}
+{% url 'instructorCourses' %}
 {% endblock courses %}
 {% block allCourses %}
 {% url 'courses' %}
@@ -17,68 +17,68 @@
 <div class=" container shadow-sm">
    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
       <ol class="breadcrumb p-3">
-         <li class="breadcrumb-item fw-bold"><a style="color: rgb(10, 10, 48)" href="{% url 'facultyCourses' %}">My
+         <li class="breadcrumb-item fw-bold"><a style="color: rgb(10, 10, 48)" href="{% url 'instructorCourses' %}">My
             Courses</a>
          </li>
          <li class="breadcrumb-item fw-bold"><a style="color: rgb(10, 10, 48)"
-            href="{% url 'faculty' course.code %}">{{ course.name }}</a></li>
+            href="{% url 'instructor' course.code %}">{{ course.name }}</a></li>
          <li class="breadcrumb-item fw-bold"><a style="color: rgb(10, 10, 48)"
-            href="{% url 'allQuizzes' course.code %}">Quizzes</a></li>
+            href="{% url 'allexams' course.code %}">Exams</a></li>
          <li class="breadcrumb-item active animate__animated animate__backInRight" aria-current="page">
-            {{quiz.title}}
+            {{exam.title}}
          </li>
       </ol>
    </nav>
 </div>
 <!-- navigation links end -->
 <div class="container shadow-sm rounded border p-3 liner-gradient-sky text-light animate__animated animate__zoomInUp">
-   {% if quiz.start < time %}
+   {% if exam.start < time %}
    <div class="row">
       <div class="col-6">
-         <div class="fs-5 fw-bold"> {{quiz.title}} - Summary</div>
+         <div class="fs-5 fw-bold"> {{exam.title}} - Summary</div>
          <div>
-            <p class="text-break word-break opacity-75"> {{quiz.description}} </p>
+            <p class="text-break word-break opacity-75"> {{exam.description}} </p>
          </div>
          <div>
             <p><span class="material-symbols-outlined inline-icons me-2">
                groups
-               </span>Student Participated : <span class="fw-bold">{{ quiz.attempted_students}}/{{total_students}}</span>
+               </span>Student Participated : <span class="fw-bold">{{ exam.attempted_students}}/{{total_students}}</span>
             </p>
             <p><span class="material-symbols-outlined inline-icons me-2">
                format_list_numbered
-               </span>Total Questions :<span class="fw-bold"> {{ quiz.total_questions}}</span> 
+               </span>Total Questions :<span class="fw-bold"> {{ exam.total_questions}}</span> 
             </p>
          </div>
       </div>
       <div class="col-6 my-4 border-start">
          <p><span class="material-symbols-outlined inline-icons me-2">
             av_timer
-            </span>Start : <span class="fw-bold"> {{quiz.starts}} </span> 
+            </span>Start : <span class="fw-bold"> {{exam.starts}} </span> 
          </p>
          <p><span class="material-symbols-outlined inline-icons me-2">
             timer_off
-            </span>End : <span class="fw-bold"> {{ quiz.ends }} </span>
+            </span>End : <span class="fw-bold"> {{ exam.ends }} </span>
          </p>
-         {% if quiz.total_marks %}
+         {% if exam.total_marks %}
          <p><span class="material-symbols-outlined inline-icons me-2">
             military_tech
-            </span>Total Marks :<span class="fw-bold"> {{ quiz.total_marks }}</span>
+            </span>Total Marks :<span class="fw-bold"> {{ exam.total_marks }}</span>
          </p>
          {% endif %}
          <p><span class="material-symbols-outlined inline-icons me-2">
             timelapse
-            </span>Quiz Duration : <span class="fw-bold"> {{ quiz.duration }}</span>
+            </span>Exam Duration : <span class="fw-bold"> {{ exam.duration }}</span>
          </p>
       </div>
    </div>
 </div>
-{% if quiz.publish_status %}
+{% if exam.publish_status %}
 <p class="text-success fw-bold d-flex justify-content-center my-3">
    Marks Published!
 </p>
 {% else %}
 <div class="d-flex justify-content-center my-3">
-   <form method="post" action=" {% url 'quizSummary' course.code quiz.id %} ">{% csrf_token %}
+   <form method="post" action=" {% url 'examSummary' course.code exam.id %} ">{% csrf_token %}
       <button class="btn btn-sm btn-primary" type="submit"> <span class="px-1">Publish marks</span> </button>
    </form>
 </div>
@@ -88,7 +88,7 @@
 </div>
 <div class="container p-3 shadow-sm rounded" id="allmarks">
    <div class="fw-bold">Marks of students</div>
-   {% if quiz.attempted_students %}
+   {% if exam.attempted_students %}
 <div class="table-responsive">
    <table class="table text-center table-borderless" style="white-space: nowrap;">
       <thead class="border-bottom">
@@ -109,7 +109,7 @@
             <td class="fw-bold text-start">{{student.name}}</td>
             <td>{{student.student_id}}</td>
             {% if student.attempted %}
-            <td>{{student.total_marks_obtained}} / {{quiz.total_marks}}</td>
+            <td>{{student.total_marks_obtained}} / {{exam.total_marks}}</td>
             <td>{{student.submission_time}}</td>
             {% else %}
             <td>Did not attempt</td>
@@ -121,7 +121,7 @@
    </table>
 </div>
    {% else %}
-   <div class="text-center">No students have attempted this quiz yet</div>
+   <div class="text-center">No students have attempted this exam yet</div>
    {% endif %}
 </div>
 <div class="container">
@@ -172,7 +172,7 @@
 </div>
 {% else %}
 <div class="fw-bold text-center">
-   Quiz not started yet
+   Exam not started yet
 </div>
 {% endif %}
 </div>

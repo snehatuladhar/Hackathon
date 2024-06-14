@@ -1,6 +1,6 @@
 {% extends 'index.html' %}
 {% load static %}
-{% block title %}{{quiz.title}} | {{ course.name }} {% endblock title %}
+{% block title %}{{exam.title}} | {{ course.name }} {% endblock title %}
 {% block profile %}
 {% url 'profile' student.student_id %}
 {% endblock %}
@@ -18,14 +18,14 @@
 <div class="container shadow-sm">
    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
       <ol class="breadcrumb p-3">
-         <li class="breadcrumb-item fw-bold"><a style="color: rgb(10, 10, 48)" href="{% url 'facultyCourses' %}">My
+         <li class="breadcrumb-item fw-bold"><a style="color: rgb(10, 10, 48)" href="{% url 'instructorCourses' %}">My
             Courses</a>
          </li>
          <li class="breadcrumb-item fw-bold"><a style="color: rgb(10, 10, 48)"
             href="{% url 'course' course.code %}">{{ course.name }}</a></li>
          <li class="breadcrumb-item fw-bold"><a style="color: rgb(10, 10, 48)"
-            href="{% url 'myQuizzes' course.code %}">Quizzes</a></li>
-         <li class="breadcrumb-item active animate__animated animate__backInRight" aria-current="page">{{quiz.title}}</li>
+            href="{% url 'myexams' course.code %}">Exams</a></li>
+         <li class="breadcrumb-item active animate__animated animate__backInRight" aria-current="page">{{exam.title}}</li>
       </ol>
    </nav>
 </div>
@@ -34,17 +34,17 @@
    <div class="shadow-sm px-3 pt-3 rounded border text-light animate__animated animate__fadeInDown" style="background: linear-gradient(270deg, #00d2ff 0%, #3a47d5 100%);">
       <div class="row">
          <div class="col-md-6">
-            <p class=" fw-bold fs-5"> {{quiz.title}} Summary</p>
+            <p class=" fw-bold fs-5"> {{exam.title}} Summary</p>
             <p class="text-light">
-               {{quiz.description}}
+               {{exam.description}}
             </p>
             <p> <span class="material-symbols-outlined inline-icons me-2">
                format_list_numbered
-               </span>Total Questions : <span class="fw-bold">{{quiz.total_questions}}</span>
+               </span>Total Questions : <span class="fw-bold">{{exam.total_questions}}</span>
             </p>
             <p><span class="material-symbols-outlined inline-icons me-2">
                military_tech
-               </span> Marks : <span class="fw-bold">{{quiz.total_marks_obtained}} / {{ quiz.total_marks}}</span>
+               </span> Marks : <span class="fw-bold">{{exam.total_marks_obtained}} / {{ exam.total_marks}}</span>
             </p>
             <p> <span class="material-symbols-outlined inline-icons me-2">
                timer
@@ -54,19 +54,19 @@
          <div class="col-md-6">
             <p><span class="material-symbols-outlined inline-icons me-2">
                history
-               </span>Started : <span class="fw-bold">{{quiz.starts}}</span>
+               </span>Started : <span class="fw-bold">{{exam.starts}}</span>
             </p>
             <p><span class="material-symbols-outlined inline-icons me-2">
                timer_off
-               </span>Ended : <span class="fw-bold">{{quiz.ends}}</span>
+               </span>Ended : <span class="fw-bold">{{exam.ends}}</span>
             </p>
             <p> <span class="material-symbols-outlined inline-icons me-2">
                timelapse
-               </span>Duration : <span class="fw-bold">{{ quiz.duration}}</span>
+               </span>Duration : <span class="fw-bold">{{ exam.duration}}</span>
             </p>
             <P><span class="material-symbols-outlined inline-icons me-2">
                alarm_on
-               </span>Submitted on : {{quiz.submission_time}}
+               </span>Submitted on : {{exam.submission_time}}
             </P>
          </div>
       </div>
@@ -116,7 +116,7 @@
    });
    
    
-   let time_taken = {{ quiz.time_taken }};
+   let time_taken = {{ exam.time_taken }};
    function convertTime(timetaken) {
        var hours = Math.floor(timetaken / 3600);
        var minutes = Math.floor((timetaken - (hours * 3600)) / 60);

@@ -23,26 +23,9 @@
                   <div class="signin-image">
                      <figure><img src="{% static 'images/login-bg.jpg' %}" alt="sign up image"></figure>
                   </div>
+
                   <div class="signin-form">
                      <h2 class="form-title">Sign in to Adex-Learning</h2>
-                     <form method="POST" class="register-form" id="login-form">
-                           {% csrf_token %}
-                           <div class="form-group">
-                              <label for="{{ form.id.id_for_label }}"><span class="material-symbols-outlined" style="vertical-align:text-bottom">person</span></label>
-                              {{ form.id }}
-                           </div>
-                           <div class="form-group">
-                              <label for="{{ form.password.id_for_label }}"><span class="material-symbols-outlined" style="vertical-align:text-bottom">lock</span></label>
-                              {{ form.password }}
-                           </div>
-                           <div class="d-grid">
-                              <button class="btn btn-lg btn-primary btn-login text-uppercase fw-bold mb-2" type="submit">Sign in</button>
-                           </div>
-                     </form>
-                        <div class="">
-                           <a href="{% url 'teacher_login' %}" role="button" target="_blank">Sign in as Teacher</a>
-                        </div>
-                     </div>
                      {% if error_messages %}
                      <!-- Error Alert -->
                      <div class="alert alert-danger alert-dismissible fade show my-2">
@@ -52,6 +35,28 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                      </div>
                      {% endif %}
+                     <form method="POST" class="register-form" id="login-form">
+                           {% csrf_token %}
+                           <div class="form-group">
+                              <label for="{{ form.id.id_for_label }} place"><span class="material-symbols-outlined" style="vertical-align:text-bottom">person</span></label>
+                              {{ form.id }} 
+                           </div>
+                           <div class="form-group">
+                              <label for="{{ form.password.id_for_label }}"><span class="material-symbols-outlined" style="vertical-align:text-bottom">lock</span></label>
+                              {{ form.password }}
+                           </div>
+                           <div class="d-flex justify-content-between">
+                           <div class="d-grid">
+                              <button class="btn btn-lg btn-primary btn-login text-uppercase fw-bold mb-2" type="submit">Sign in</button>
+                           </div>
+                           <div class="">
+                              <a href="{% url 'teacher_login' %}" role="button" class="btn btn-lg btn-primary btn-login text-uppercase text-white fw-bold" target="_blank">Sign in as Teacher</a>
+                           </div>
+                           </div>
+                        </form>
+                        
+                     </div>
+                     
                   </div>
                </div>
             </div>

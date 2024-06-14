@@ -1,7 +1,7 @@
 import datetime
 from django.shortcuts import redirect, render
 from django.contrib import messages
-from .models import Student, Course, Announcement, Assignment, Submission, Material, Faculty, Department
+from .models import Student, Course, Announcement, Assignment, Submission, Material, Instructor, ClassRooms
 from django.template.defaulttags import register
 from django.db.models import Count, Q
 from django.http import HttpResponseRedirect
@@ -28,14 +28,14 @@ def is_student_authorised(request, code):
         return False
 
 
-def is_faculty_authorised(request, code):
-    if request.session.get('faculty_id') and code in Course.objects.filter(faculty_id=request.session['faculty_id']).values_list('code', flat=True):
+def is_instructor_authorised(request, code):
+    if request.session.get('instructor_id') and code in Course.objects.filter(instructor_id=request.session['instructor_id']).values_list('code', flat=True):
         return True
     else:
         return False
 
 
-# Custom Login page for both student and faculty
+# Custom Login page for both student and instructor
 def std_login(request):
     error_messages = []
 
@@ -49,9 +49,9 @@ def std_login(request):
             if Student.objects.filter(student_id=id, password=password).exists():
                 request.session['student_id'] = id
                 return redirect('myCourses')
-            elif Faculty.objects.filter(faculty_id=id, password=password).exists():
-                request.session['faculty_id'] = id
-                return redirect('facultyCourses')
+            elif Instructor.objects.filter(instructor_id=id, password=password).exists():
+                request.session['instructor_id'] = id
+                return redirect('instructorCourses')
             else:
                 error_messages.append('Invalid login credentials.')
         else:
@@ -61,8 +61,8 @@ def std_login(request):
 
     if 'student_id' in request.session:
         return redirect('/my/')
-    elif 'faculty_id' in request.session:
-        return redirect('/facultyCourses/')
+    elif 'instructor_id' in request.session:
+        return redirect('/instructorCourses/')
 
     context = {'form': form, 'error_messages': error_messages}
     return render(request, 'login_page.html', context)
@@ -82,12 +82,12 @@ def myCourses(request):
             student = Student.objects.get(
                 student_id=request.session['student_id'])
             courses = student.course.all()
-            faculty = student.course.all().values_list('faculty_id', flat=True)
+            instructor = student.course.all().values_list('instructor_id', flat=True)
 
             context = {
                 'courses': courses,
                 'student': student,
-                'faculty': faculty
+                'instructor': instructor
             }
 
             return render(request, 'main/myCourses.html', context)
@@ -97,15 +97,15 @@ def myCourses(request):
         return render(request, 'error.html')
 
 
-# Display all courses (faculty view)
-def facultyCourses(request):
+# Display all courses (instructor view)
+def instructorCourses(request):
     try:
-        if request.session['faculty_id']:
-            faculty = Faculty.objects.get(
-                faculty_id=request.session['faculty_id'])
+        if request.session['instructor_id']:
+            instructor = Instructor.objects.get(
+                instructor_id=request.session['instructor_id'])
             courses = Course.objects.filter(
-                faculty_id=request.session['faculty_id'])
-            # Student count of each course to show on the faculty page
+                instructor_id=request.session['instructor_id'])
+            # Student count of each course to show on the instructor page
             studentCount = Course.objects.all().annotate(student_count=Count('students'))
 
             studentCountDict = {}
@@ -119,11 +119,11 @@ def facultyCourses(request):
 
             context = {
                 'courses': courses,
-                'faculty': faculty,
+                'instructor': instructor,
                 'studentCount': studentCountDict
             }
 
-            return render(request, 'main/facultyCourses.html', context)
+            return render(request, 'main/instructorCourses.html', context)
 
         else:
             return redirect('std_login')
@@ -134,40 +134,42 @@ def facultyCourses(request):
 
 # Particular course page (student view)
 def course_page(request, code):
-    try:
-        course = Course.objects.get(code=code)
-        if is_student_authorised(request, code):
-            try:
-                announcements = Announcement.objects.filter(course_code=course)
-                assignments = Assignment.objects.filter(
-                    course_code=course.code)
-                materials = Material.objects.filter(course_code=course.code)
-
-            except:
-                announcements = None
-                assignments = None
-                materials = None
-
-            context = {
-                'course': course,
-                'announcements': announcements,
-                'assignments': assignments[:3],
-                'materials': materials,
-                'student': Student.objects.get(student_id=request.session['student_id'])
-            }
-
-            return render(request, 'main/course.html', context)
-
-        else:
-            return redirect('std_login')
-    except:
-        return render(request, 'error.html')
-
-
-# Particular course page (faculty view)
-def course_page_faculty(request, code):
+    # try:
     course = Course.objects.get(code=code)
-    if request.session.get('faculty_id'):
+    if is_student_authorised(request, code):
+        try:
+            announcements = Announcement.objects.filter(course_code=course)
+            assignments = Assignment.objects.filter(
+                course_code=course.code)
+            materials = Material.objects.filter(course_code=course.code)
+
+        except:
+            announcements = None
+            assignments = None
+            materials = None
+
+        context = {
+            'course': course,
+            'announcements': announcements,
+            'assignments': assignments[:3],
+            'materials': materials,
+            'student': Student.objects.get(student_id=request.session['student_id'])
+        }
+
+        print(materials)
+
+        return render(request, 'main/course.html', context)
+
+    else:
+        return redirect('std_login')
+    # except:
+    #     return render(request, 'error.html')
+
+
+# Particular course page (instructor view)
+def course_page_instructor(request, code):
+    course = Course.objects.get(code=code)
+    if request.session.get('instructor_id'):
         try:
             announcements = Announcement.objects.filter(course_code=course)
             assignments = Assignment.objects.filter(
@@ -185,11 +187,11 @@ def course_page_faculty(request, code):
             'announcements': announcements,
             'assignments': assignments[:3],
             'materials': materials,
-            'faculty': Faculty.objects.get(faculty_id=request.session['faculty_id']),
+            'instructor': Instructor.objects.get(instructor_id=request.session['instructor_id']),
             'studentCount': studentCount
         }
 
-        return render(request, 'main/faculty_course.html', context)
+        return render(request, 'main/instructor_course.html', context)
     else:
         return redirect('std_login')
 
@@ -198,7 +200,7 @@ def error(request):
     return render(request, 'error.html')
 
 
-# Display user profile(student & faculty)
+# Display user profile(student & instructor)
 def profile(request, id):
     try:
         if request.session['student_id'] == id:
@@ -208,9 +210,9 @@ def profile(request, id):
             return redirect('std_login')
     except:
         try:
-            if request.session['faculty_id'] == id:
-                faculty = Faculty.objects.get(faculty_id=id)
-                return render(request, 'main/faculty_profile.html', {'faculty': faculty})
+            if request.session['instructor_id'] == id:
+                instructor = Instructor.objects.get(instructor_id=id)
+                return render(request, 'main/instructor_profile.html', {'instructor': instructor})
             else:
                 return redirect('std_login')
         except:
@@ -218,7 +220,7 @@ def profile(request, id):
 
 
 def addAnnouncement(request, code):
-    if is_faculty_authorised(request, code):
+    if is_instructor_authorised(request, code):
         if request.method == 'POST':
             form = AnnouncementForm(request.POST)
             form.instance.course_code = Course.objects.get(code=code)
@@ -226,35 +228,35 @@ def addAnnouncement(request, code):
                 form.save()
                 messages.success(
                     request, 'Announcement added successfully.')
-                return redirect('/faculty/' + str(code))
+                return redirect('/instructor/' + str(code))
         else:
             form = AnnouncementForm()
-        return render(request, 'main/announcement.html', {'course': Course.objects.get(code=code), 'faculty': Faculty.objects.get(faculty_id=request.session['faculty_id']), 'form': form})
+        return render(request, 'main/announcement.html', {'course': Course.objects.get(code=code), 'instructor': Instructor.objects.get(instructor_id=request.session['instructor_id']), 'form': form})
     else:
         return redirect('std_login')
 
 
 def deleteAnnouncement(request, code, id):
-    if is_faculty_authorised(request, code):
+    if is_instructor_authorised(request, code):
         try:
             announcement = Announcement.objects.get(course_code=code, id=id)
             announcement.delete()
             messages.warning(request, 'Announcement deleted successfully.')
-            return redirect('/faculty/' + str(code))
+            return redirect('/instructor/' + str(code))
         except:
-            return redirect('/faculty/' + str(code))
+            return redirect('/instructor/' + str(code))
     else:
         return redirect('std_login')
 
 
 def editAnnouncement(request, code, id):
-    if is_faculty_authorised(request, code):
+    if is_instructor_authorised(request, code):
         announcement = Announcement.objects.get(course_code_id=code, id=id)
         form = AnnouncementForm(instance=announcement)
         context = {
             'announcement': announcement,
             'course': Course.objects.get(code=code),
-            'faculty': Faculty.objects.get(faculty_id=request.session['faculty_id']),
+            'instructor': Instructor.objects.get(instructor_id=request.session['instructor_id']),
             'form': form
         }
         return render(request, 'main/update-announcement.html', context)
@@ -263,33 +265,33 @@ def editAnnouncement(request, code, id):
 
 
 def updateAnnouncement(request, code, id):
-    if is_faculty_authorised(request, code):
+    if is_instructor_authorised(request, code):
         try:
             announcement = Announcement.objects.get(course_code_id=code, id=id)
             form = AnnouncementForm(request.POST, instance=announcement)
             if form.is_valid():
                 form.save()
                 messages.info(request, 'Announcement updated successfully.')
-                return redirect('/faculty/' + str(code))
+                return redirect('/instructor/' + str(code))
         except:
-            return redirect('/faculty/' + str(code))
+            return redirect('/instructor/' + str(code))
 
     else:
         return redirect('std_login')
 
 
 def addAssignment(request, code):
-    if is_faculty_authorised(request, code):
+    if is_instructor_authorised(request, code):
         if request.method == 'POST':
             form = AssignmentForm(request.POST, request.FILES)
             form.instance.course_code = Course.objects.get(code=code)
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Assignment added successfully.')
-                return redirect('/faculty/' + str(code))
+                return redirect('/instructor/' + str(code))
         else:
             form = AssignmentForm()
-        return render(request, 'main/assignment.html', {'course': Course.objects.get(code=code), 'faculty': Faculty.objects.get(faculty_id=request.session['faculty_id']), 'form': form})
+        return render(request, 'main/assignment.html', {'course': Course.objects.get(code=code), 'instructor': Instructor.objects.get(instructor_id=request.session['instructor_id']), 'form': form})
     else:
         return redirect('std_login')
 
@@ -333,7 +335,7 @@ def assignmentPage(request, code, id):
 
 
 def allAssignments(request, code):
-    if is_faculty_authorised(request, code):
+    if is_instructor_authorised(request, code):
         course = Course.objects.get(code=code)
         assignments = Assignment.objects.filter(course_code=course)
         studentCount = Student.objects.filter(course=course).count()
@@ -341,7 +343,7 @@ def allAssignments(request, code):
         context = {
             'assignments': assignments,
             'course': course,
-            'faculty': Faculty.objects.get(faculty_id=request.session['faculty_id']),
+            'instructor': Instructor.objects.get(instructor_id=request.session['instructor_id']),
             'studentCount': studentCount
 
         }
@@ -406,7 +408,7 @@ def addSubmission(request, code, id):
 
 def viewSubmission(request, code, id):
     course = Course.objects.get(code=code)
-    if is_faculty_authorised(request, code):
+    if is_instructor_authorised(request, code):
         try:
             assignment = Assignment.objects.get(course_code_id=code, id=id)
             submissions = Submission.objects.filter(
@@ -417,14 +419,14 @@ def viewSubmission(request, code, id):
                 'submissions': submissions,
                 'assignment': assignment,
                 'totalStudents': len(Student.objects.filter(course=course)),
-                'faculty': Faculty.objects.get(faculty_id=request.session['faculty_id']),
-                'courses': Course.objects.filter(faculty_id=request.session['faculty_id'])
+                'instructor': Instructor.objects.get(instructor_id=request.session['instructor_id']),
+                'courses': Course.objects.filter(instructor_id=request.session['instructor_id'])
             }
 
             return render(request, 'main/assignment-view.html', context)
 
         except:
-            return redirect('/faculty/' + str(code))
+            return redirect('/instructor/' + str(code))
     else:
         return redirect('std_login')
 
@@ -432,7 +434,7 @@ def viewSubmission(request, code, id):
 def gradeSubmission(request, code, id, sub_id):
     try:
         course = Course.objects.get(code=code)
-        if is_faculty_authorised(request, code):
+        if is_instructor_authorised(request, code):
             if request.method == 'POST':
                 assignment = Assignment.objects.get(course_code_id=code, id=id)
                 submissions = Submission.objects.filter(
@@ -456,8 +458,8 @@ def gradeSubmission(request, code, id, sub_id):
                     'submissions': submissions,
                     'assignment': assignment,
                     'totalStudents': len(Student.objects.filter(course=course)),
-                    'faculty': Faculty.objects.get(faculty_id=request.session['faculty_id']),
-                    'courses': Course.objects.filter(faculty_id=request.session['faculty_id'])
+                    'instructor': Instructor.objects.get(instructor_id=request.session['instructor_id']),
+                    'courses': Course.objects.filter(instructor_id=request.session['instructor_id'])
                 }
 
                 return render(request, 'main/assignment-view.html', context)
@@ -469,36 +471,105 @@ def gradeSubmission(request, code, id, sub_id):
 
 
 def addCourseMaterial(request, code):
-    if is_faculty_authorised(request, code):
+    if is_instructor_authorised(request, code):
         if request.method == 'POST':
             form = MaterialForm(request.POST, request.FILES)
             form.instance.course_code = Course.objects.get(code=code)
             if form.is_valid():
                 form.save()
                 messages.success(request, 'New course material added')
-                return redirect('/faculty/' + str(code))
+                return redirect('/instructor/' + str(code))
             else:
-                return render(request, 'main/course-material.html', {'course': Course.objects.get(code=code), 'faculty': Faculty.objects.get(faculty_id=request.session['faculty_id']), 'form': form})
+                return render(request, 'main/course-material.html', {'course': Course.objects.get(code=code), 'instructor': Instructor.objects.get(instructor_id=request.session['instructor_id']), 'form': form})
         else:
             form = MaterialForm()
-            return render(request, 'main/course-material.html', {'course': Course.objects.get(code=code), 'faculty': Faculty.objects.get(faculty_id=request.session['faculty_id']), 'form': form})
+            return render(request, 'main/course-material.html', {'course': Course.objects.get(code=code), 'instructor': Instructor.objects.get(instructor_id=request.session['instructor_id']), 'form': form})
     else:
         return redirect('std_login')
 
+def courseMaterial(request, code, id):
+    if request.session.get('student_id') or request.session.get('faculty_id'):
+        material = Material.objects.get(course_code=code, id=id)
+        course = Course.objects.get(code=code)
+        print(material)
+        # courses = Course.objects.all()
+        if request.session.get('student_id'):
+            student = Student.objects.get(
+                student_id=request.session['student_id'])
+        else:
+            student = None
+        if request.session.get('faculty_id'):
+            faculty = Instructor.objects.get(
+                faculty_id=request.session['faculty_id'])
+        else:
+            faculty = None
+
+        # enrolled = student.course.all() if student else None
+        # accessed = Course.objects.filter(
+        #     faculty_id=faculty.faculty_id) if faculty else None
+        # if is_faculty_authorised(request, code):
+        context = {
+            'material': material,
+            'faculty': faculty,
+            'course': course,
+            # 'courses': courses,
+            'student': student,
+            # 'enrolled': enrolled,
+            # 'accessed': accessed
+        }
+
+        return render(request, 'main/material.html', context)
+            # form = MaterialForm()
+            # # print(form)
+            # return render(request, 'main/course-material.html', {'course': Course.objects.get(code=code), 'faculty': Instructor.objects.get(faculty_id=request.session['faculty_id']), 'form': form})
+    else:
+        return redirect('std_login')
+
+def editCourseMaterial(request, code, id):
+    if request.session.get('faculty_id'):
+        instance = Material.objects.get(id=id)
+        if request.method == "POST":
+            # form = MyModelForm(request.POST, instance=instance)
+            form = MaterialForm(request.POST or None, instance=instance)
+            if form.is_valid():
+                form.save()
+                print("in valid1")
+                return redirect("viewCourseMaterial", code, id)
+            # else:
+            #     return render(request, 'main/editMaterial.html', context)
+            # return render(request, 'my_template.html', {'form': form}) 
+
+            # return render(request, 'main/editMaterial.html', context)
+        else:
+            faculty = Instructor.objects.get(
+                faculty_id=request.session['faculty_id'])
+            form = MaterialForm(request.POST or None, instance=instance)
+            course = Course.objects.get(code=code)
+            context = {
+                'course': course,
+                'material': instance,
+                'form': form,
+                'faculty': faculty
+            }
+            # return redirect("viewCourseMaterial", code, id)
+            return render(request, 'main/editMaterial.html', context)
+            # form = MaterialForm(instance=instance)
+    else:
+        return redirect('std_login')
 
 def deleteCourseMaterial(request, code, id):
-    if is_faculty_authorised(request, code):
+    if is_instructor_authorised(request, code):
         course = Course.objects.get(code=code)
         course_material = Material.objects.get(course_code=course, id=id)
         course_material.delete()
         messages.warning(request, 'Course material deleted')
-        return redirect('/faculty/' + str(code))
+        return redirect('/instructor/' + str(code))
     else:
         return redirect('std_login')
 
 
 def courses(request):
-    if request.session.get('student_id') or request.session.get('faculty_id'):
+    if request.session.get('student_id') or request.session.get('instructor_id'):
 
         courses = Course.objects.all()
         if request.session.get('student_id'):
@@ -506,18 +577,18 @@ def courses(request):
                 student_id=request.session['student_id'])
         else:
             student = None
-        if request.session.get('faculty_id'):
-            faculty = Faculty.objects.get(
-                faculty_id=request.session['faculty_id'])
+        if request.session.get('instructor_id'):
+            instructor = Instructor.objects.get(
+                instructor_id=request.session['instructor_id'])
         else:
-            faculty = None
+            instructor = None
 
         enrolled = student.course.all() if student else None
         accessed = Course.objects.filter(
-            faculty_id=faculty.faculty_id) if faculty else None
+            instructor_id=instructor.instructor_id) if instructor else None
 
         context = {
-            'faculty': faculty,
+            'instructor': instructor,
             'courses': courses,
             'student': student,
             'enrolled': enrolled,
@@ -530,26 +601,26 @@ def courses(request):
         return redirect('std_login')
 
 
-def departments(request):
-    if request.session.get('student_id') or request.session.get('faculty_id'):
-        departments = Department.objects.all()
+def classes(request):
+    if request.session.get('student_id') or request.session.get('instructor_id'):
+        classes = ClassRooms.objects.all()
         if request.session.get('student_id'):
             student = Student.objects.get(
                 student_id=request.session['student_id'])
         else:
             student = None
-        if request.session.get('faculty_id'):
-            faculty = Faculty.objects.get(
-                faculty_id=request.session['faculty_id'])
+        if request.session.get('instructor_id'):
+            instructor = Instructor.objects.get(
+                instructor_id=request.session['instructor_id'])
         else:
-            faculty = None
+            instructor = None
         context = {
-            'faculty': faculty,
+            'instructor': instructor,
             'student': student,
-            'deps': departments
+            'deps': classes
         }
 
-        return render(request, 'main/departments.html', context)
+        return render(request, 'main/classes.html', context)
 
     else:
         return redirect('std_login')
@@ -575,29 +646,29 @@ def access(request, code):
 
 
 def search(request):
-    if request.session.get('student_id') or request.session.get('faculty_id'):
+    if request.session.get('student_id') or request.session.get('instructor_id'):
         if request.method == 'GET' and request.GET['q']:
             q = request.GET['q']
             courses = Course.objects.filter(Q(code__icontains=q) | Q(
-                name__icontains=q) | Q(faculty__name__icontains=q))
+                name__icontains=q) | Q(instructor__name__icontains=q))
 
             if request.session.get('student_id'):
                 student = Student.objects.get(
                     student_id=request.session['student_id'])
             else:
                 student = None
-            if request.session.get('faculty_id'):
-                faculty = Faculty.objects.get(
-                    faculty_id=request.session['faculty_id'])
+            if request.session.get('instructor_id'):
+                instructor = Instructor.objects.get(
+                    instructor_id=request.session['instructor_id'])
             else:
-                faculty = None
+                instructor = None
             enrolled = student.course.all() if student else None
             accessed = Course.objects.filter(
-                faculty_id=faculty.faculty_id) if faculty else None
+                instructor_id=instructor.instructor_id) if instructor else None
 
             context = {
                 'courses': courses,
-                'faculty': faculty,
+                'instructor': instructor,
                 'student': student,
                 'enrolled': enrolled,
                 'accessed': accessed,
@@ -614,9 +685,9 @@ def changePasswordPrompt(request):
     if request.session.get('student_id'):
         student = Student.objects.get(student_id=request.session['student_id'])
         return render(request, 'main/changePassword.html', {'student': student})
-    elif request.session.get('faculty_id'):
-        faculty = Faculty.objects.get(faculty_id=request.session['faculty_id'])
-        return render(request, 'main/changePasswordFaculty.html', {'faculty': faculty})
+    elif request.session.get('instructor_id'):
+        instructor = Instructor.objects.get(instructor_id=request.session['instructor_id'])
+        return render(request, 'main/changePasswordInstructor.html', {'instructor': instructor})
     else:
         return redirect('std_login')
 
@@ -625,9 +696,9 @@ def changePhotoPrompt(request):
     if request.session.get('student_id'):
         student = Student.objects.get(student_id=request.session['student_id'])
         return render(request, 'main/changePhoto.html', {'student': student})
-    elif request.session.get('faculty_id'):
-        faculty = Faculty.objects.get(faculty_id=request.session['faculty_id'])
-        return render(request, 'main/changePhotoFaculty.html', {'faculty': faculty})
+    elif request.session.get('instructor_id'):
+        instructor = Instructor.objects.get(instructor_id=request.session['instructor_id'])
+        return render(request, 'main/changePhotoInstructor.html', {'instructor': instructor})
     else:
         return redirect('std_login')
 
@@ -653,25 +724,25 @@ def changePassword(request):
         return redirect('std_login')
 
 
-def changePasswordFaculty(request):
-    if request.session.get('faculty_id'):
-        faculty = Faculty.objects.get(
-            faculty_id=request.session['faculty_id'])
+def changePasswordInstructor(request):
+    if request.session.get('instructor_id'):
+        instructor = Instructor.objects.get(
+            instructor_id=request.session['instructor_id'])
         if request.method == 'POST':
-            if faculty.password == request.POST['oldPassword']:
+            if instructor.password == request.POST['oldPassword']:
                 # New and confirm password check is done in the client side
-                faculty.password = request.POST['newPassword']
-                faculty.save()
+                instructor.password = request.POST['newPassword']
+                instructor.save()
                 messages.success(request, 'Password was changed successfully')
-                return redirect('/facultyProfile/' + str(faculty.faculty_id))
+                return redirect('/instructorProfile/' + str(instructor.instructor_id))
             else:
                 print('error')
                 messages.error(
                     request, 'Password is incorrect. Please try again')
-                return redirect('/changePasswordFaculty/')
+                return redirect('/changePasswordInstructor/')
         else:
-            print(faculty)
-            return render(request, 'main/changePasswordFaculty.html', {'faculty': faculty})
+            print(instructor)
+            return render(request, 'main/changePasswordInstructor.html', {'instructor': instructor})
     else:
         return redirect('std_login')
 
@@ -696,22 +767,22 @@ def changePhoto(request):
         return redirect('std_login')
 
 
-def changePhotoFaculty(request):
-    if request.session.get('faculty_id'):
-        faculty = Faculty.objects.get(
-            faculty_id=request.session['faculty_id'])
+def changePhotoInstructor(request):
+    if request.session.get('instructor_id'):
+        instructor = Instructor.objects.get(
+            instructor_id=request.session['instructor_id'])
         if request.method == 'POST':
             if request.FILES['photo']:
-                faculty.photo = request.FILES['photo']
-                faculty.save()
+                instructor.photo = request.FILES['photo']
+                instructor.save()
                 messages.success(request, 'Photo was changed successfully')
-                return redirect('/facultyProfile/' + str(faculty.faculty_id))
+                return redirect('/instructorProfile/' + str(instructor.instructor_id))
             else:
                 messages.error(
                     request, 'Please select a photo')
-                return redirect('/changePhotoFaculty/')
+                return redirect('/changePhotoInstructor/')
         else:
-            return render(request, 'main/changePhotoFaculty.html', {'faculty': faculty})
+            return render(request, 'main/changePhotoInstructor.html', {'instructor': instructor})
     else:
         return redirect('std_login')
 
@@ -726,12 +797,12 @@ def guestStudent(request):
         return redirect('std_login')
 
 
-def guestFaculty(request):
+def guestInstructor(request):
     request.session.flush()
     try:
-        faculty = Faculty.objects.get(name='Guest Faculty')
-        request.session['faculty_id'] = str(faculty.faculty_id)
-        return redirect('facultyCourses')
+        instructor = Instructor.objects.get(name='Guest Instructor')
+        request.session['instructor_id'] = str(instructor.instructor_id)
+        return redirect('instructorCourses')
     except:
         return redirect('std_login')
     
@@ -755,9 +826,9 @@ class TeacherLoginView(View):
             id = form.cleaned_data['id']
             password = form.cleaned_data['password']
 
-            if Faculty.objects.filter(faculty_id=id, password=password).exists():
-                request.session['faculty_id'] = id
-                return redirect('facultyCourses')
+            if Instructor.objects.filter(instructor_id=id, password=password).exists():
+                request.session['instructor_id'] = id
+                return redirect('instructorCourses')
             else:
                 error_messages.append('Invalid login credentials.')
         else:

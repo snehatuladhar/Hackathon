@@ -1,13 +1,13 @@
 {% extends 'index.html' %}
-{% block title %}Create Quiz | {{ course.name }} {% endblock title %}
+{% block title %}Create Exam | {{ course.name }} {% endblock title %}
 {% block profile %}
-{% url 'profile' faculty.faculty_id %}
+{% url 'profile' instructor.instructor_id %}
 {% endblock %}
 {% block user %}
-{{faculty.name}}
+{{instructor.name}}
 {% endblock user %}
 {% block courses %}
-{% url 'facultyCourses' %}
+{% url 'instructorCourses' %}
 {% endblock courses %}
 {% block allCourses %}
 {% url 'courses' %}
@@ -18,14 +18,14 @@
    <div class="container shadow-sm">
       <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
          <ol class="breadcrumb p-3">
-            <li class="breadcrumb-item fw-bold"><a style="color: rgb(10, 10, 48)" href="{% url 'facultyCourses' %}">My
+            <li class="breadcrumb-item fw-bold"><a style="color: rgb(10, 10, 48)" href="{% url 'instructorCourses' %}">My
                Courses</a>
             </li>
             <li class="breadcrumb-item fw-bold"><a style="color: rgb(10, 10, 48)"
-               href="{% url 'faculty' course.code %}">{{ course.name }}</a></li>
+               href="{% url 'instructor' course.code %}">{{ course.name }}</a></li>
             <li class="breadcrumb-item fw-bold"><a style="color: rgb(10, 10, 48)"
-               href="{% url 'allQuizzes' course.code %}">All quizzes</a></li>
-            <li class="breadcrumb-item active animate__animated animate__backInRight" aria-current="page">Create Quiz</li>
+               href="{% url 'allexams' course.code %}">All exams</a></li>
+            <li class="breadcrumb-item active animate__animated animate__backInRight" aria-current="page">Create Exam</li>
          </ol>
       </nav>
    </div>
@@ -34,12 +34,12 @@
 <div class="container d-flex justify-content-center mt-3" id="form">
    <div class="border shadow-sm border-light rounded pb-4 px-3 col-lg-8 col-sm-12 mt-3">
       <span class="fw-bold fs-5 d-flex justify-content-center my-3">
-      Create Quiz
+      Create Exam
       </span>
-      <form action="{% url 'quiz' course.code %}" method="POST">
+      <form action="{% url 'exam' course.code %}" method="POST">
          {% csrf_token %}
          <div class="mb-3 mt-3 fw-bold">
-            <label for="title" class="form-label">Quiz Title</label>
+            <label for="title" class="form-label">Exam Title</label>
             <input type="text" class="form-control" id="title" name='title' required>
          </div>
          <div class="mb-3 fw-bold">
@@ -62,7 +62,7 @@
          </div>
          <div class="d-flex justify-content-end p-2 border" style="background-color: rgb(250,250,250);">
             <button type="submit" class="btn btn-sm btn-primary mx-2">Proceed</button>
-            <a href="{% url 'allQuizzes' course.code %}" type="button" class="btn btn-sm btn-danger">Discard</a>
+            <a href="{% url 'allexams' course.code %}" type="button" class="btn btn-sm btn-danger">Discard</a>
          </div>
       </form>
    </div>
@@ -86,9 +86,9 @@
        }
    });
    
-   let addQuiz = document.getElementById('form');
+   let addExam = document.getElementById('form');
    anime({
-      targets: addQuiz,
+      targets: addExam,
       opacity: [0, 1],
       easing: 'easeInOutQuad',
       duration: 1500,

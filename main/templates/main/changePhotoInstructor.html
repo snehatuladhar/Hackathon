@@ -18,13 +18,13 @@
       <div class="container">
          <div style="min-height:85vh" class="row justify-content-center align-items-center">
             <div class="col-lg-5 col-sm-12 p-5 rounded shadow">
-               <form action="{% url 'changePhotoFaculty' %}" method="post" enctype="multipart/form-data">
+               <form action="{% url 'changePhotoInstructor' %}" method="post" enctype="multipart/form-data">
                   {% csrf_token %}
                   <div class="text-center">
                      <h5 class="mb-3 fw-bold">Change Profile Picture</h5>
                   </div>
                   <div class="my-3 text-center">
-                     <img src="/media/{{faculty.photo}}" alt="image" class="rounded-circle" style="height: 10rem ; width:10rem">
+                     <img src="/media/{{instructor.photo}}" alt="image" class="rounded-circle" style="height: 10rem ; width:10rem">
                   </div>
                   <div class="mb-3">
                      <label for="photo" class="form-label ">Photo</label>
@@ -34,10 +34,10 @@
                      <button type="submit" class="btn btn-primary">Submit</button>
                   </div>
                   <div class="text-center mt-3">
-                     <a href="{% url 'profile' faculty.faculty_id %}">Cancel</a>
+                     <a href="{% url 'profile' instructor.instructor_id %}">Cancel</a>
                   </div>
                </form>
-               <p class="text-center mt-3"> <span class="text-muted">logged in as</span>  {{faculty.name}}</p>
+               <p class="text-center mt-3"> <span class="text-muted">logged in as</span>  {{instructor.name}}</p>
                {% if messages %}
                <div class="alert alert-danger mt-3" role="alert">
                   {% for message in messages %}

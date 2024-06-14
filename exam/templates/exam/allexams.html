@@ -1,13 +1,13 @@
 {% extends 'index.html' %}
-{% block title %}Quizzes | {{ course.name }} {% endblock title %}
+{% block title %}Exams | {{ course.name }} {% endblock title %}
 {% block profile %}
-{% url 'profile' faculty.faculty_id %}
+{% url 'profile' instructor.instructor_id %}
 {% endblock %}
 {% block user %}
-{{faculty.name}}
+{{instructor.name}}
 {% endblock user %}
 {% block courses %}
-{% url 'facultyCourses' %}
+{% url 'instructorCourses' %}
 {% endblock courses %}
 {% block allCourses %}
 {% url 'courses' %}
@@ -27,12 +27,12 @@
 <div class="container shadow-sm">
    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
       <ol class="breadcrumb p-3">
-         <li class="breadcrumb-item fw-bold"><a style="color: rgb(10, 10, 48)" href="{% url 'facultyCourses' %}">My
+         <li class="breadcrumb-item fw-bold"><a style="color: rgb(10, 10, 48)" href="{% url 'instructorCourses' %}">My
             Courses</a>
          </li>
          <li class="breadcrumb-item fw-bold"><a style="color: rgb(10, 10, 48)"
-            href="{% url 'faculty' course.code %}">{{ course.name }}</a></li>
-         <li class="breadcrumb-item active animate__animated animate__backInRight" aria-current="page">Quizzes</li>
+            href="{% url 'instructor' course.code %}">{{ course.name }}</a></li>
+         <li class="breadcrumb-item active animate__animated animate__backInRight" aria-current="page">Exams</li>
       </ol>
    </nav>
 </div>
@@ -40,20 +40,20 @@
 <div class="container rounded border">
    <div class="py-1 m-2 rounded d-flex justify-content-between flex-wrap">
       <span></span>
-      <h5 class="fw-bold text-center">Quizzes -  {{ course.name}}</h5>
+      <h5 class="fw-bold text-center">Exams -  {{ course.name}}</h5>
       <div>
-         <a class="btn btn-sm btn-success px-3" href="{% url 'quiz' course.code %}">New</a>
+         <a class="btn btn-sm btn-success px-3" href="{% url 'exam' course.code %}">New</a>
       </div>
    </div>
 </div>
 <div class="container rounded animate__animated animate__jackInTheBox">
-   {% if quizzes %}
+   {% if exams %}
    <div class="table-responsive">
       <table class="table my-3 text-center" style="white-space: nowrap;">
          <thead class="table-dark">
             <tr>
                <th scope="col">SL</th>
-               <th scope="col">Quiz</th>
+               <th scope="col">Exam</th>
                <th scope="col">Starts</th>
                <th scope="col">Ends</th>
                <th scope="col">Questions</th>
@@ -61,18 +61,18 @@
             </tr>
          </thead>
          <tbody class="table-group-divider">
-            {% for quiz in quizzes %}
+            {% for exam in exams %}
             <tr>
                <th scope="row">{{ forloop.counter }}</th>
                <td>
-                  <a class="fw-bold" {% if quiz.started %} style="color:#004481" {% endif %} href="{% url 'quizSummary' course.code quiz.id %}">{{ quiz.title}}</a>
+                  <a class="fw-bold" {% if exam.started %} style="color:#004481" {% endif %} href="{% url 'examSummary' course.code exam.id %}">{{ exam.title}}</a>
                </td>
-               <td>{{ quiz.starts}} </td>
-               <td>{{ quiz.ends}}</td>
-               <td>{{ quiz.total_questions}}</td>
+               <td>{{ exam.starts}} </td>
+               <td>{{ exam.ends}}</td>
+               <td>{{ exam.total_questions}}</td>
                <td>
-                  {% if quiz.started == 0 %}
-                  <a class="btn btn-sm btn-primary" href="{% url 'addQuestion' course.code quiz.id %}">Add question</a>
+                  {% if exam.started == 0 %}
+                  <a class="btn btn-sm btn-primary" href="{% url 'addQuestion' course.code exam.id %}">Add questions</a>
                   {% else %}
                   <button disabled class="btn btn-sm btn-primary">Add question</button>
                   {% endif %}
@@ -84,7 +84,7 @@
    </div>
    {% else %}
    <div >
-      <p class="text-center fw-bold pb-3">No quizzes found</p>
+      <p class="text-center fw-bold pb-3">No exams found</p>
    </div>
    {% endif %}
 </div>
